@@ -1,4 +1,4 @@
-def max_calories(calories):
+def max_calories(calories, top=1):
     from collections import Counter
     calories_per_elf = Counter()
     elf = 1
@@ -7,4 +7,4 @@ def max_calories(calories):
             elf += 1
             continue
         calories_per_elf[elf] += int(cal)
-    return calories_per_elf.most_common()[0][1]
+    return sum(x[1] for x in calories_per_elf.most_common()[0:top])
