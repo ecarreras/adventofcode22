@@ -1,5 +1,7 @@
 # Advent of Code 2022 using Python and TDD
 
+[![Test](https://github.com/ecarreras/adventofcode22/actions/workflows/python-app.yml/badge.svg)](https://github.com/ecarreras/adventofcode22/actions/workflows/python-app.yml)
+
 ## Install requirements
 
 ```shell
