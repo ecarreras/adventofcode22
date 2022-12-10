@@ -24,13 +24,13 @@ class Knot:
         self.position = position
     
     def move(self, direction, number: int):
-        if direction == 'R':
+        if 'R' in direction:
             self.position.x += number
-        elif direction == 'L':
+        if 'L' in direction:
             self.position.x -= number
-        elif direction == 'U':
+        if 'U' in direction:
             self.position.y += number
-        elif direction == 'D':
+        if 'D' in direction:
             self.position.y -= number
     
     def batch_move(self, input):
@@ -39,46 +39,71 @@ class Knot:
             self.move(direction, int(number))
 
 
-class Tail(Knot):
-    def __init__(self, position: Position) -> None:
+class Head(Knot):
+    def __init__(self, position: Position, tail) -> None:
         super().__init__(position)
+        self.tail = tail
+    
+    def follow(self, direction):
+        if not self.touching_tail:
+            if self.position.x == self.tail.position.x:
+                self.tail.move(direction[0], 1)
+            elif self.position.y == self.tail.position.y:
+                self.tail.move(direction[-1], 1)
+            else:
+                if self.position.y > self.tail.position.y:
+                    tail_direction = 'U'
+                else:
+                    tail_direction = 'D'
+                if self.position.x > self.tail.position.x:
+                    tail_direction += 'R'
+                else:
+                    tail_direction += 'L'
+                self.tail.move(tail_direction, 1)
+
+    
+    def move(self, direction, number: int):
+        for _ in range(0, number):
+            super().move(direction, 1)
+            self.follow(direction)
+    
+    @property
+    def touching_tail(self):
+        if not self.tail:
+            return True
+        return self.position.touches(self.tail.position)
+
+
+class Tail(Head):
+    def __init__(self, position: Position, tail=None) -> None:
+        super().__init__(position, tail)
         self.historical_positions = [Position(position.x, position.y)]
 
     def move(self, direction, number: int):
-        for d in direction:
-            super().move(d, number)
+        super().move(direction, number)
         self.historical_positions.append(
             Position(self.position.x, self.position.y)
         )
 
 
-class Head(Knot):
-    def __init__(self, position: Position, tail: Tail) -> None:
-        super().__init__(position)
-        self.tail = tail
+class Grid:
+    def __init__(self, cols, rows, knots) -> None:
+        self.cols = cols
+        self.rows = rows
+        self.knots = knots
     
-    def move(self, direction, number: int):
-        super().move(direction, number)
-        if not self.touching_tail:
-            if (self.position.x == self.tail.position.x or
-                self.position.y == self.tail.position.y):
-                for _ in range(0, number):
-                    if not self.touching_tail:
-                        self.tail.move(direction, 1)
-            else:
-                if self.position.x > self.tail.position.x:
-                    tail_direction = 'R'
+    def print(self):
+        print()
+        print('-- GRID --')
+        for y in reversed(range(0, self.rows)):
+            row = ''
+            for x in range(0, self.cols):
+                pos = Position(x, y)
+                for knot in self.knots:
+                    if knot.position == pos:
+                        row += knot.name
+                        break
                 else:
-                    tail_direction = 'L'
-                if self.position.y > self.tail.position.y:
-                    tail_direction += 'U'
-                else:
-                    tail_direction += 'D'
-                self.tail.move(tail_direction, 1)
-                for _ in range(0, number):
-                    if not self.touching_tail:
-                        self.tail.move(direction, 1)
-    
-    @property
-    def touching_tail(self):
-        return self.position.touches(self.tail.position)
+                    row += '.'
+            print(row)
+        print('-- END GRID --')
