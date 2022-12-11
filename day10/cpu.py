@@ -29,13 +29,14 @@ class CPU:
         'noop': Noop
     }
 
-    def __init__(self) -> None:
+    def __init__(self, crt=None) -> None:
         self.x = 1
         self.cycles = 0
         self.idx = 0
         self.instructions = []
         self.current_instruction = None
         self.signals = {}
+        self.crt = crt
     
     @property
     def total_signal(self):
@@ -50,6 +51,12 @@ class CPU:
         self.current_instruction.TICKS -= 1
         if (self.cycles % 40) == 20:
             self.signals[self.cycles] = self.cycles * self.x
+        if self.crt:
+            self.crt.tick()
+            if self.x - 1 <= self.crt.pixel <= self.x + 1:
+                self.crt.print('#')
+            else:
+                self.crt.print('.')
             
         if not self.current_instruction.TICKS:
             self.current_instruction.execute()
@@ -63,3 +70,25 @@ class CPU:
         while self.idx < len(self.instructions):
             self.tick()
 
+
+class CRT:
+    def __init__(self, wide, high) -> None:
+        self.cycles = 0
+        self.screen = []
+        for _ in range(0, high):
+            self.screen.append(['' for x in range(0, wide)])
+    
+    def tick(self):
+        self.cycles += 1
+    
+    def print(self, char):
+        self.screen[self.row][self.pixel] = char
+
+    @property
+    def row(self):
+        import math
+        return math.ceil(self.cycles / 40) - 1
+    
+    @property
+    def pixel(self):
+        return (self.cycles % 40) - 1

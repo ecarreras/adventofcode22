@@ -1,6 +1,6 @@
 from mamba import *
 from expects import *
-from day10.cpu import CPU, Addx, Noop
+from day10.cpu import CPU, Addx, Noop, CRT
 
 
 with description('Day 10'):
@@ -248,5 +248,65 @@ with description('Day 10'):
         with context('The sum of total signal'):
             with it('should be 13140'):
                 expect(self.cpu.total_signal).to(equal(13140))
+    
+    with description('A CRT with a 40 wide and 6 height'):
+        with before.all as self:
+            self.crt = CRT(40, 6)
+        with it('should have 6 rows screen'):
+            expect(len(self.crt.screen)).to(equal(6))
+        
+        with description('For each cycle'):
+            with context('When cycle is 1 the position'):
+                with it('should be row 0, pixel 0'):
+                    self.crt.tick()
+                    expect(self.crt.cycles).to(equal(1))
+                    expect(self.crt.row).to(equal(0))
+                    expect(self.crt.pixel).to(equal(0))
+            with context('When cycle is 240'):
+                with it('should be row 5, position -1'):
+                    self.crt.cycles = 240
+                    expect(self.crt.row).to(equal(5))
+                    expect(self.crt.pixel).to(equal(-1))
+
+    
+    with description('Running a small program with CRT'):
+        with before.all as self:
+            self.crt = CRT(40, 6)
+            self.cpu = CPU(self.crt)
+            instructions = """
+            addx 15
+            addx -11
+            addx 6
+            addx -3
+            addx 5
+            addx -1
+            addx -8
+            addx 13
+            addx 4
+            noop
+            addx -1
+            """
+            self.cpu.load_instructions(instructions)
+        with description('Durying cycle 1'):
+            with context('CRT current row'):
+                with it('should paint # at pixel 0'):
+                    self.cpu.tick()
+                    expect(self.crt.screen[0][0]).to(equal('#'))
+        with description('Durying cycle 2'):
+            with context('CRT current row'):
+                with it('should paint # at pixel 1'):
+                    self.cpu.tick()
+                    expect(self.crt.screen[0][1]).to(equal('#'))
+        with description('Durying cycle 3'):
+            with context('CRT current row'):
+                with it('should paint . at pixel 2'):
+                    self.cpu.tick()
+                    expect(self.crt.screen[0][2]).to(equal('.'))
+        with describe('Running until the end'):
+            with context('CRT current row'):
+                with it('should be ##..##..##..##..##..#'):
+                    self.cpu.run()
+                    expect(''.join(self.crt.screen[0])).to(equal('##..##..##..##..##..#'))
+
 
             
