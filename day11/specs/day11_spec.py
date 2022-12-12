@@ -176,3 +176,86 @@ with description('Day 11'):
                 with context('monkey business'):
                     with it('must be 10605'):
                         expect(self.mg.monkey_business).to(equal(10605))
+    
+    with description('Without dividing in 3'):
+        with before.all as self:
+            input = """
+            Monkey 0:
+                Starting items: 79, 98
+                Operation: new = old * 19
+                Test: divisible by 23
+                    If true: throw to monkey 2
+                    If false: throw to monkey 3
+
+            Monkey 1:
+                Starting items: 54, 65, 75, 74
+                Operation: new = old + 6
+                Test: divisible by 19
+                    If true: throw to monkey 2
+                    If false: throw to monkey 0
+
+            Monkey 2:
+                Starting items: 79, 60, 97
+                Operation: new = old * old
+                Test: divisible by 13
+                    If true: throw to monkey 1
+                    If false: throw to monkey 3
+
+            Monkey 3:
+                Starting items: 74
+                Operation: new = old + 3
+                Test: divisible by 17
+                    If true: throw to monkey 0
+                    If false: throw to monkey 1
+            """
+            self.mg = MonkeysGroup(input, divide=1)
+        with description('After round 1'):
+            with before.all as self:
+                self.mg.round()
+            with context('Monkey 0'):
+                with it('is inspected 2 times'):
+                    expect(self.mg.monkeys[0].inspections).to(equal(2))
+            with context('Monkey 1'):
+                with it('is inspected 4 times'):
+                    expect(self.mg.monkeys[1].inspections).to(equal(4))
+            with context('Monkey 2'):
+                with it('is inspected 3 times'):
+                    expect(self.mg.monkeys[2].inspections).to(equal(3))
+            with context('Monkey 3'):
+                with it('is inspected 6 times'):
+                    expect(self.mg.monkeys[3].inspections).to(equal(6))
+        with description('After round 20'):
+            with before.all as self:
+                for _ in range(1, 20):
+                    self.mg.round()
+            with context('Monkey 0'):
+                with it('is inspected 99 times'):
+                    expect(self.mg.monkeys[0].inspections).to(equal(99))
+            with context('Monkey 1'):
+                with it('is inspected 97 times'):
+                    expect(self.mg.monkeys[1].inspections).to(equal(97))
+            with context('Monkey 2'):
+                with it('is inspected 8 times'):
+                    expect(self.mg.monkeys[2].inspections).to(equal(8))
+            with context('Monkey 3'):
+                with it('is inspected 103 times'):
+                    expect(self.mg.monkeys[3].inspections).to(equal(103))
+        with description('After round 10.000'):
+            with before.all as self:
+                for _ in range(20, 10_000):
+                    self.mg.round()
+            with context('Monkey 0'):
+                with it('is inspected 52166 times'):
+                    expect(self.mg.monkeys[0].inspections).to(equal(52166))
+            with context('Monkey 1'):
+                with it('is inspected 47830 times'):
+                    expect(self.mg.monkeys[1].inspections).to(equal(47830))
+            with context('Monkey 2'):
+                with it('is inspected 1938 times'):
+                    expect(self.mg.monkeys[2].inspections).to(equal(1938))
+            with context('Monkey 3'):
+                with it('is inspected 52013 times'):
+                    expect(self.mg.monkeys[3].inspections).to(equal(52013))
+            with context('monkey business'):
+                with it('should be 2713310158'):
+                    expect(self.mg.monkey_business).to(equal(2713310158))
